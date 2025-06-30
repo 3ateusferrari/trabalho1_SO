@@ -36,35 +36,38 @@ void reset_input_mode(struct termios* saved_attributes) {
 
 void* capturar_entrada(void* arg) {
     char entrada;
-    
     while (jogo_rodando) {
         entrada = getchar();
-        
-        pthread_mutex_lock(&helicoptero.mutex);
-        switch (entrada) {
-            case 'w':
-            case 'W':
-                if (helicoptero.y > 0) helicoptero.y--;
-                break;
-            case 's':
-            case 'S':
-                if (helicoptero.y < TELA_ALTURA - 1) helicoptero.y++;
-                break;
-            case 'a':
-            case 'A':
-                if (helicoptero.x > 0) helicoptero.x--;
-                break;
-            case 'd':
-            case 'D':
-                if (helicoptero.x < TELA_LARGURA - 1) helicoptero.x++;
-                break;
-            case 'q':
-            case 'Q':
-                jogo_rodando = 0;
-                helicoptero.vivo = 0;
-                break;
+        if (entrada == '\033') { // Código de escape
+            getchar(); // '['
+            switch(getchar()) {
+                case 'A': // Seta para cima
+                    pthread_mutex_lock(&helicoptero.mutex);
+                    if (helicoptero.y > 0) helicoptero.y--;
+                    pthread_mutex_unlock(&helicoptero.mutex);
+                    break;
+                case 'B': // Seta para baixo
+                    pthread_mutex_lock(&helicoptero.mutex);
+                    if (helicoptero.y < TELA_ALTURA - 1) helicoptero.y++;
+                    pthread_mutex_unlock(&helicoptero.mutex);
+                    break;
+                case 'C': // Seta para direita
+                    pthread_mutex_lock(&helicoptero.mutex);
+                    if (helicoptero.x < TELA_LARGURA - 1) helicoptero.x++;
+                    pthread_mutex_unlock(&helicoptero.mutex);
+                    break;
+                case 'D': // Seta para esquerda
+                    pthread_mutex_lock(&helicoptero.mutex);
+                    if (helicoptero.x > 0) helicoptero.x--;
+                    pthread_mutex_unlock(&helicoptero.mutex);
+                    break;
+            }
+        } else if (entrada == 'q' || entrada == 'Q') {
+            pthread_mutex_lock(&helicoptero.mutex);
+            jogo_rodando = 0;
+            helicoptero.vivo = 0;
+            pthread_mutex_unlock(&helicoptero.mutex);
         }
-        pthread_mutex_unlock(&helicoptero.mutex);
     }
     return NULL;
 }
@@ -74,6 +77,35 @@ int main() {
     set_input_mode(&saved_attributes);
     srand(time(NULL));
     
+    // Seleção de dificuldade
+    printf("Selecione o nível de dificuldade:\n");
+    printf("1 - Fácil\n2 - Médio\n3 - Difícil\n> ");
+    int escolha = 2;
+    scanf("%d", &escolha);
+    getchar(); // Limpa o enter do buffer
+    switch (escolha) {
+        case 1:
+            nivel_dificuldade = FACIL;
+            capacidade_bateria = 3;
+            tempo_recarga_bateria = 2000000; // 2 segundos
+            break;
+        case 2:
+            nivel_dificuldade = MEDIO;
+            capacidade_bateria = 5;
+            tempo_recarga_bateria = 1000000; // 1 segundo
+            break;
+        case 3:
+            nivel_dificuldade = DIFICIL;
+            capacidade_bateria = 10;
+            tempo_recarga_bateria = 500000; // 0.5 segundo
+            break;
+        default:
+            nivel_dificuldade = MEDIO;
+            capacidade_bateria = 5;
+            tempo_recarga_bateria = 1000000;
+            break;
+    }
+
     // Criação das threads
     pthread_create(&thread_helicoptero, NULL, thread_func_helicoptero, NULL);
     pthread_create(&thread_bateria0, NULL, thread_func_bateria0, NULL);

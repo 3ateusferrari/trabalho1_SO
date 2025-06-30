@@ -31,8 +31,8 @@ void recarregar_bateria(Bateria* bat) {
     
     // Acesso ao depósito
     pthread_mutex_lock(&mutex_deposito);
-    usleep(500000); // Simula tempo de recarga
-    bat->municao = 5;
+    usleep(tempo_recarga_bateria); // Usa tempo global
+    bat->municao = capacidade_bateria; // Usa capacidade global
     bat->recarregando = 0;
     pthread_mutex_unlock(&mutex_deposito);
     
@@ -44,7 +44,7 @@ void recarregar_bateria(Bateria* bat) {
 
 void* thread_func_bateria0(void* arg) {
     bateria0.id = 0;
-    bateria0.municao = 5;
+    bateria0.municao = capacidade_bateria;
     bateria0.recarregando = 0;
     pthread_mutex_init(&bateria0.mutex, NULL);
     
@@ -75,7 +75,7 @@ void* thread_func_bateria0(void* arg) {
 
 void* thread_func_bateria1(void* arg) {
     bateria1.id = 1;
-    bateria1.municao = 5;
+    bateria1.municao = capacidade_bateria;
     bateria1.recarregando = 0;
     pthread_mutex_init(&bateria1.mutex, NULL);
     

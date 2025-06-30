@@ -5,6 +5,9 @@
 #include <unistd.h>
 
 Helicoptero helicoptero;
+int soldados_embarcados = 0;
+int soldados_resgatados = 0;
+int soldados_total = 10;
 
 // Função para verificar colisão com foguetes
 int verificar_colisao_foguetes() {
@@ -19,6 +22,13 @@ int verificar_colisao_foguetes() {
         pthread_mutex_unlock(&foguetes[i].mutex);
     }
     return 0; // Sem colisão
+}
+
+void resetar_helicoptero() {
+    helicoptero.x = 2;
+    helicoptero.y = TELA_ALTURA / 2;
+    helicoptero.vivo = 1;
+    soldados_embarcados = 1;
 }
 
 void* thread_func_helicoptero(void* arg) {

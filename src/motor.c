@@ -90,17 +90,31 @@ int helicoptero_na_plataforma() {
     return 0;
 }
 
+// Função para verificar colisão com baterias, depósito ou plataforma (exceto pouso)
+int colisao_com_estruturas(int x, int y) {
+    // Colisão com baterias (posição fixa à esquerda)
+    if ((x == 0 && (y == 5 || y == 10)) || // Exemplo: baterias em y=5 e y=10
+        (x == 5 && y == TELA_ALTURA-2)) // Exemplo: depósito
+        return 1;
+    // Colisão com plataforma (exceto pouso)
+    if (x >= plataforma.x && x < plataforma.x + plataforma.largura &&
+        y >= plataforma.y && y < plataforma.y + plataforma.altura)
+        return 2; // Plataforma
+    return 0;
+}
+
 void renderizar_jogo() {
     desenhar_tela();
     limpar_tela();
     printf("=== JOGO DO HELICÓPTERO ===\n");
-    printf("Controles: w (cima), s (baixo), q (sair)\n\n");
+    printf("Soldados resgatados: %d/%d\n", soldados_resgatados, soldados_total);
+    printf("Controles: setas (mover), q (sair)\n\n");
     for (int y = 0; y < TELA_ALTURA; y++) {
         printf("%s\n", tela[y]);
     }
     // Status
     pthread_mutex_lock(&helicoptero.mutex);
-    printf("Helicóptero: (%d, %d) - %s\n", helicoptero.x, helicoptero.y, helicoptero.vivo ? "VIVO" : "MORTO");
+    printf("Helicóptero: (%d, %d) - %s - Soldados a bordo: %d\n", helicoptero.x, helicoptero.y, helicoptero.vivo ? "VIVO" : "MORTO", soldados_embarcados);
     pthread_mutex_unlock(&helicoptero.mutex);
     pthread_mutex_lock(&bateria0.mutex);
     printf("Bateria 0: %d munições - %s\n", bateria0.municao, bateria0.recarregando ? "RECARREGANDO" : "PRONTA");
@@ -128,23 +142,44 @@ void renderizar_jogo() {
         printf("=== FIM DE JOGO ===\nHelicóptero foi destruído!\n");
     }
     pthread_mutex_unlock(&helicoptero.mutex);
-    if (helicoptero_na_plataforma()) {
+    if (soldados_resgatados >= soldados_total) {
         jogo_rodando = 0;
-        printf("=== VITÓRIA! ===\nHelicóptero pousou na plataforma!\n");
+        printf("=== VITÓRIA! ===\nTodos os soldados foram resgatados!\n");
     }
 }
 
 void* thread_func_motor(void* arg) {
     inicializar_obstaculos_e_plataforma();
+    resetar_helicoptero();
     while (jogo_rodando) {
-        // Verifica colisão do helicóptero com obstáculos
         pthread_mutex_lock(&helicoptero.mutex);
+        // Colisão com topo
+        if (helicoptero.y == 0) {
+            helicoptero.vivo = 0;
+        }
+        // Colisão com solo
+        if (helicoptero.y == TELA_ALTURA-1) {
+            helicoptero.vivo = 0;
+        }
+        // Colisão com obstáculos
         if (colisao_com_obstaculo(helicoptero.x, helicoptero.y)) {
             helicoptero.vivo = 0;
         }
+        // Colisão com baterias, depósito, plataforma (exceto pouso)
+        int col = colisao_com_estruturas(helicoptero.x, helicoptero.y);
+        if (col == 1) {
+            helicoptero.vivo = 0;
+        }
+        // Desembarque na plataforma
+        if (col == 2 && helicoptero.vivo && soldados_embarcados > 0) {
+            soldados_resgatados += soldados_embarcados;
+            if (soldados_resgatados < soldados_total) {
+                resetar_helicoptero();
+            }
+        }
         pthread_mutex_unlock(&helicoptero.mutex);
         renderizar_jogo();
-        usleep(150000); // Atualiza a cada 150ms
+        usleep(150000);
     }
     return NULL;
 } 

@@ -13,6 +13,12 @@ typedef struct {
 // Variável global do helicóptero
 extern Helicoptero helicoptero;
 
+// Controle de soldados
+extern int soldados_embarcados;
+extern int soldados_resgatados;
+extern int soldados_total;
+void resetar_helicoptero();
+
 void* thread_func_helicoptero(void* arg);
 
 #endif // HELICOPTERO_H 
