@@ -28,14 +28,11 @@ void* thread_func_helicoptero(void* arg) {
     helicoptero.vivo = 1;
     pthread_mutex_init(&helicoptero.mutex, NULL);
 
-    printf("Helicóptero iniciado na posição (%d, %d)\n", helicoptero.x, helicoptero.y);
-
     while (helicoptero.vivo) {
         pthread_mutex_lock(&helicoptero.mutex);
         
         // Verifica colisões
         if (verificar_colisao_foguetes()) {
-            printf("Helicóptero atingido por foguete!\n");
             helicoptero.vivo = 0;
         }
         
@@ -50,6 +47,5 @@ void* thread_func_helicoptero(void* arg) {
         usleep(50000); // 50ms de atualização
     }
     
-    printf("Helicóptero finalizado.\n");
     return NULL;
 } 

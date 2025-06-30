@@ -24,17 +24,13 @@ int encontrar_foguete_livre() {
 
 // Função para recarregar bateria
 void recarregar_bateria(Bateria* bat) {
-    printf("Bateria %d: Iniciando recarga...\n", bat->id);
-    
     // Travessia da ponte (ida)
     pthread_mutex_lock(&mutex_ponte);
-    printf("Bateria %d: Cruzando ponte para depósito...\n", bat->id);
     usleep(200000); // Simula travessia
     pthread_mutex_unlock(&mutex_ponte);
     
     // Acesso ao depósito
     pthread_mutex_lock(&mutex_deposito);
-    printf("Bateria %d: Recarregando no depósito...\n", bat->id);
     usleep(500000); // Simula tempo de recarga
     bat->municao = 5;
     bat->recarregando = 0;
@@ -42,11 +38,8 @@ void recarregar_bateria(Bateria* bat) {
     
     // Travessia da ponte (volta)
     pthread_mutex_lock(&mutex_ponte);
-    printf("Bateria %d: Cruzando ponte de volta...\n", bat->id);
     usleep(200000); // Simula travessia
     pthread_mutex_unlock(&mutex_ponte);
-    
-    printf("Bateria %d: Recarga concluída!\n", bat->id);
 }
 
 void* thread_func_bateria0(void* arg) {
@@ -54,8 +47,6 @@ void* thread_func_bateria0(void* arg) {
     bateria0.municao = 5;
     bateria0.recarregando = 0;
     pthread_mutex_init(&bateria0.mutex, NULL);
-    
-    printf("Bateria 0 iniciada com %d munições\n", bateria0.municao);
     
     while (1) {
         pthread_mutex_lock(&bateria0.mutex);
@@ -67,8 +58,6 @@ void* thread_func_bateria0(void* arg) {
                 foguetes[foguete_id].x = TELA_LARGURA - 10; // Posição da bateria
                 foguetes[foguete_id].y = rand() % TELA_ALTURA; // Direção aleatória
                 bateria0.municao--;
-                printf("Bateria 0: Disparou foguete %d. Munições restantes: %d\n", 
-                       foguete_id, bateria0.municao);
             }
         } else if (bateria0.municao == 0 && !bateria0.recarregando) {
             // Inicia recarga
@@ -90,8 +79,6 @@ void* thread_func_bateria1(void* arg) {
     bateria1.recarregando = 0;
     pthread_mutex_init(&bateria1.mutex, NULL);
     
-    printf("Bateria 1 iniciada com %d munições\n", bateria1.municao);
-    
     while (1) {
         pthread_mutex_lock(&bateria1.mutex);
         
@@ -102,8 +89,6 @@ void* thread_func_bateria1(void* arg) {
                 foguetes[foguete_id].x = TELA_LARGURA - 15; // Posição diferente da bateria 0
                 foguetes[foguete_id].y = rand() % TELA_ALTURA; // Direção aleatória
                 bateria1.municao--;
-                printf("Bateria 1: Disparou foguete %d. Munições restantes: %d\n", 
-                       foguete_id, bateria1.municao);
             }
         } else if (bateria1.municao == 0 && !bateria1.recarregando) {
             // Inicia recarga

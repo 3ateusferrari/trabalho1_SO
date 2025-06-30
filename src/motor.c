@@ -135,7 +135,6 @@ void renderizar_jogo() {
 }
 
 void* thread_func_motor(void* arg) {
-    printf("Motor do jogo iniciado\n");
     inicializar_obstaculos_e_plataforma();
     while (jogo_rodando) {
         // Verifica colisão do helicóptero com obstáculos
@@ -147,6 +146,5 @@ void* thread_func_motor(void* arg) {
         renderizar_jogo();
         usleep(150000); // Atualiza a cada 150ms
     }
-    printf("Motor do jogo finalizado\n");
     return NULL;
 } 

@@ -15,8 +15,6 @@ void* thread_func_foguetes(void* arg) {
         pthread_mutex_init(&foguetes[i].mutex, NULL);
     }
     
-    printf("Thread de foguetes iniciada\n");
-    
     while (1) {
         for (int i = 0; i < 10; i++) {
             pthread_mutex_lock(&foguetes[i].mutex);
@@ -28,7 +26,6 @@ void* thread_func_foguetes(void* arg) {
                 // Se foguete saiu da tela, desativa
                 if (foguetes[i].x < 0) {
                     foguetes[i].ativo = 0;
-                    printf("Foguete %d saiu da tela\n", i);
                 }
             }
             
