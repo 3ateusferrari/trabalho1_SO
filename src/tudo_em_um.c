@@ -281,10 +281,41 @@ void* thread_func_bateria0(void* arg) {
     bateria0.x = TELA_LARGURA - 5;
     bateria0.y = 5;
     bateria0.nivel = capacidade_bateria;
+    bateria0.movimento_x = 1; // Movimenta-se para direita inicialmente
+    bateria0.movimento_y = 0;
+    bateria0.timer_movimento = 0;
     pthread_mutex_init(&bateria0.mutex, NULL);
     usleep(100000);
     while (jogo_rodando) {
         pthread_mutex_lock(&bateria0.mutex);
+        
+        // Movimento da bateria (apenas quando não está recarregando)
+        if (!bateria0.recarregando) {
+            bateria0.timer_movimento++;
+            if (bateria0.timer_movimento > 30) { // Muda direção a cada ~1.5 segundos
+                bateria0.timer_movimento = 0;
+                // Escolhe nova direção aleatória
+                int direcao = rand() % 4;
+                switch(direcao) {
+                    case 0: bateria0.movimento_x = 1; bateria0.movimento_y = 0; break;  // Direita
+                    case 1: bateria0.movimento_x = -1; bateria0.movimento_y = 0; break; // Esquerda
+                    case 2: bateria0.movimento_x = 0; bateria0.movimento_y = 1; break;  // Baixo
+                    case 3: bateria0.movimento_x = 0; bateria0.movimento_y = -1; break; // Cima
+                }
+            }
+            
+            // Aplica movimento com limites
+            int novo_x = bateria0.x + bateria0.movimento_x;
+            int novo_y = bateria0.y + bateria0.movimento_y;
+            
+            // Limites para a bateria 0 (lado direito superior)
+            if (novo_x >= TELA_LARGURA - 15 && novo_x <= TELA_LARGURA - 3 && 
+                novo_y >= 2 && novo_y <= 10) {
+                bateria0.x = novo_x;
+                bateria0.y = novo_y;
+            }
+        }
+        
         if (bateria0.municao > 0 && !bateria0.recarregando) {
             int foguete_id = encontrar_foguete_livre();
             if (foguete_id != -1) {
