@@ -61,6 +61,8 @@ typedef struct {
     int ativa;
     int x, y;
     int nivel;
+    int movimento_x, movimento_y; // Direção do movimento
+    int timer_movimento; // Timer para mudança de direção
     pthread_mutex_t mutex;
 } Bateria;
 
