@@ -404,11 +404,17 @@ void reinicializar_baterias(void) {
     bateria0.municao = capacidade_bateria;
     bateria0.nivel = capacidade_bateria;
     bateria0.recarregando = 0;
+    bateria0.movimento_x = 1;
+    bateria0.movimento_y = 0;
+    bateria0.timer_movimento = 0;
     pthread_mutex_unlock(&bateria0.mutex);
     pthread_mutex_lock(&bateria1.mutex);
     bateria1.municao = capacidade_bateria;
     bateria1.nivel = capacidade_bateria;
     bateria1.recarregando = 0;
+    bateria1.movimento_x = -1;
+    bateria1.movimento_y = 0;
+    bateria1.timer_movimento = 0;
     pthread_mutex_unlock(&bateria1.mutex);
     printf("Baterias reinicializadas com %d foguetes cada\n", capacidade_bateria);
 }
