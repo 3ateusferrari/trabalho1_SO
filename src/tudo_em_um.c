@@ -4,8 +4,13 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <math.h>
+#define _DEFAULT_SOURCE
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 // --- Definitions from utils.h ---
 #define TELA_LARGURA 80
