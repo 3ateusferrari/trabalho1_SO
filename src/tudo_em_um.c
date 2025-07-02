@@ -88,9 +88,9 @@ typedef struct {
 } GraphicsSystem;
 
 int capacidade_bateria = 5;
-useconds_t tempo_recarga_bateria = 1000000;
-useconds_t tempo_disparo_min = 300000;
-useconds_t tempo_disparo_max = 500000;
+unsigned int tempo_recarga_bateria = 1000000;
+unsigned int tempo_disparo_min = 300000;
+unsigned int tempo_disparo_max = 500000;
 Dificuldade nivel_dificuldade = MEDIO;
 int soldados_embarcados = 1;
 int soldados_resgatados = 0;
