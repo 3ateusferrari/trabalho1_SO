@@ -438,7 +438,162 @@ void* thread_func_motor(void* arg) {
     return NULL;
 }
 
-// --- Graphics Functions ---
+// Função para desenhar helicóptero mais bonito
+void graphics_draw_helicopter(int x, int y) {
+    if (!graphics.renderer) return;
+    
+    // Corpo principal (azul claro)
+    SDL_Rect corpo = {x, y + 5, 25, 8};
+    SDL_SetRenderDrawColor(graphics.renderer, 100, 149, 237, 255);
+    SDL_RenderFillRect(graphics.renderer, &corpo);
+    
+    // Cockpit (azul escuro)
+    SDL_Rect cockpit = {x + 18, y + 3, 7, 6};
+    SDL_SetRenderDrawColor(graphics.renderer, 25, 25, 112, 255);
+    SDL_RenderFillRect(graphics.renderer, &cockpit);
+    
+    // Rotor principal (circular)
+    SDL_SetRenderDrawColor(graphics.renderer, 64, 64, 64, 255);
+    for(int i = 0; i < 360; i += 30) {
+        int rx = x + 12 + (int)(15 * cos(i * M_PI / 180));
+        int ry = y + 2 + (int)(2 * sin(i * M_PI / 180));
+        SDL_RenderDrawLine(graphics.renderer, x + 12, y + 2, rx, ry);
+    }
+    
+    // Cauda
+    SDL_Rect cauda = {x - 8, y + 7, 12, 3};
+    SDL_SetRenderDrawColor(graphics.renderer, 100, 149, 237, 255);
+    SDL_RenderFillRect(graphics.renderer, &cauda);
+    
+    // Rotor de cauda
+    SDL_SetRenderDrawColor(graphics.renderer, 64, 64, 64, 255);
+    SDL_RenderDrawLine(graphics.renderer, x - 10, y + 4, x - 10, y + 12);
+    SDL_RenderDrawLine(graphics.renderer, x - 13, y + 8, x - 7, y + 8);
+}
+
+// Função para desenhar bateria/canhão mais bonito
+void graphics_draw_battery(int x, int y, int recarregando) {
+    if (!graphics.renderer) return;
+    
+    // Base da bateria (verde militar)
+    SDL_Rect base = {x, y + 8, 20, 10};
+    if (recarregando) {
+        SDL_SetRenderDrawColor(graphics.renderer, 255, 165, 0, 255); // Laranja quando recarregando
+    } else {
+        SDL_SetRenderDrawColor(graphics.renderer, 85, 107, 47, 255); // Verde militar
+    }
+    SDL_RenderFillRect(graphics.renderer, &base);
+    
+    // Torre da bateria
+    SDL_Rect torre = {x + 6, y + 4, 8, 8};
+    SDL_SetRenderDrawColor(graphics.renderer, 105, 105, 105, 255); // Cinza
+    SDL_RenderFillRect(graphics.renderer, &torre);
+    
+    // Canhão
+    SDL_Rect canhao = {x + 14, y + 6, 12, 4};
+    SDL_SetRenderDrawColor(graphics.renderer, 64, 64, 64, 255); // Cinza escuro
+    SDL_RenderFillRect(graphics.renderer, &canhao);
+    
+    // Detalhes da bateria
+    SDL_SetRenderDrawColor(graphics.renderer, 169, 169, 169, 255);
+    SDL_RenderDrawRect(graphics.renderer, &base);
+    SDL_RenderDrawRect(graphics.renderer, &torre);
+}
+
+// Função para desenhar foguete mais bonito
+void graphics_draw_rocket(int x, int y) {
+    if (!graphics.renderer) return;
+    
+    // Corpo do foguete (vermelho)
+    SDL_Rect corpo = {x, y, 12, 4};
+    SDL_SetRenderDrawColor(graphics.renderer, 220, 20, 60, 255);
+    SDL_RenderFillRect(graphics.renderer, &corpo);
+    
+    // Ponta do foguete (amarelo)
+    SDL_Rect ponta = {x + 12, y + 1, 4, 2};
+    SDL_SetRenderDrawColor(graphics.renderer, 255, 215, 0, 255);
+    SDL_RenderFillRect(graphics.renderer, &ponta);
+    
+    // Rastro do foguete (laranja)
+    SDL_SetRenderDrawColor(graphics.renderer, 255, 140, 0, 255);
+    SDL_RenderDrawLine(graphics.renderer, x - 2, y + 1, x, y + 1);
+    SDL_RenderDrawLine(graphics.renderer, x - 2, y + 2, x, y + 2);
+    SDL_RenderDrawLine(graphics.renderer, x - 4, y + 2, x - 2, y + 2);
+}
+
+// Função para desenhar soldado mais bonito
+void graphics_draw_soldier(int x, int y, int on_helicopter) {
+    if (!graphics.renderer) return;
+    
+    if (on_helicopter) {
+        // Soldado menor quando no helicóptero
+        SDL_Rect capacete = {x, y, 6, 4};
+        SDL_SetRenderDrawColor(graphics.renderer, 34, 139, 34, 255); // Verde
+        SDL_RenderFillRect(graphics.renderer, &capacete);
+        
+        SDL_Rect corpo = {x + 1, y + 4, 4, 6};
+        SDL_SetRenderDrawColor(graphics.renderer, 107, 142, 35, 255); // Verde oliva
+        SDL_RenderFillRect(graphics.renderer, &corpo);
+    } else {
+        // Soldado normal no chão
+        SDL_Rect capacete = {x + 2, y, 8, 6};
+        SDL_SetRenderDrawColor(graphics.renderer, 34, 139, 34, 255); // Verde
+        SDL_RenderFillRect(graphics.renderer, &capacete);
+        
+        SDL_Rect corpo = {x, y + 6, 12, 10};
+        SDL_SetRenderDrawColor(graphics.renderer, 107, 142, 35, 255); // Verde oliva
+        SDL_RenderFillRect(graphics.renderer, &corpo);
+        
+        // Pernas
+        SDL_Rect perna1 = {x + 2, y + 16, 3, 6};
+        SDL_Rect perna2 = {x + 7, y + 16, 3, 6};
+        SDL_SetRenderDrawColor(graphics.renderer, 85, 107, 47, 255);
+        SDL_RenderFillRect(graphics.renderer, &perna1);
+        SDL_RenderFillRect(graphics.renderer, &perna2);
+    }
+}
+
+// Função para desenhar plataforma mais bonita
+void graphics_draw_platform(int x, int y, int width, int height) {
+    if (!graphics.renderer) return;
+    
+    // Base da plataforma (verde escuro)
+    SDL_Rect base = {x, y, width, height};
+    SDL_SetRenderDrawColor(graphics.renderer, 34, 139, 34, 255);
+    SDL_RenderFillRect(graphics.renderer, &base);
+    
+    // Bordas da plataforma
+    SDL_SetRenderDrawColor(graphics.renderer, 0, 100, 0, 255);
+    SDL_RenderDrawRect(graphics.renderer, &base);
+    
+    // Detalhes da plataforma (listras)
+    SDL_SetRenderDrawColor(graphics.renderer, 124, 252, 0, 255);
+    for(int i = 0; i < width; i += 8) {
+        SDL_RenderDrawLine(graphics.renderer, x + i, y, x + i, y + height);
+    }
+}
+
+// Função para desenhar obstáculos mais bonitos
+void graphics_draw_obstacle(int x, int y) {
+    if (!graphics.renderer) return;
+    
+    int cell_w = SCREEN_WIDTH / TELA_LARGURA;
+    int cell_h = SCREEN_HEIGHT / TELA_ALTURA;
+    
+    // Rocha/obstáculo (cinza com textura)
+    SDL_Rect obstaculo = {x, y, cell_w, cell_h};
+    SDL_SetRenderDrawColor(graphics.renderer, 105, 105, 105, 255);
+    SDL_RenderFillRect(graphics.renderer, &obstaculo);
+    
+    // Textura do obstáculo
+    SDL_SetRenderDrawColor(graphics.renderer, 169, 169, 169, 255);
+    SDL_RenderDrawRect(graphics.renderer, &obstaculo);
+    
+    // Detalhes da rocha
+    SDL_SetRenderDrawColor(graphics.renderer, 128, 128, 128, 255);
+    SDL_RenderDrawLine(graphics.renderer, x + 2, y + 2, x + cell_w - 2, y + cell_h - 2);
+    SDL_RenderDrawLine(graphics.renderer, x + cell_w - 2, y + 2, x + 2, y + cell_h - 2);
+}
 int graphics_init(void) {
     printf("Iniciando SDL...\n");
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
