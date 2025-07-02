@@ -317,8 +317,8 @@ void* thread_func_bateria1(void* arg) {
         if (bateria1.municao > 0 && !bateria1.recarregando) {
             int foguete_id = encontrar_foguete_livre();
             if (foguete_id != -1) {
-                foguetes[foguete_id].x = TELA_LARGURA - 10;
-                foguetes[foguete_id].y = rand() % TELA_ALTURA;
+                foguetes[foguete_id].x = bateria1.x;
+                foguetes[foguete_id].y = bateria1.y;
                 bateria1.municao--;
                 bateria1.nivel = bateria1.municao;
             }
