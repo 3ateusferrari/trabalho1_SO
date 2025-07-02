@@ -854,106 +854,101 @@ void graphics_draw_difficulty_menu(void) {
 
 void graphics_draw_game_screen(void) {
     if (!graphics.renderer) return;
-    SDL_SetRenderDrawColor(graphics.renderer, 0, 0, 0, 255);
+    
+    // Fundo do céu (gradiente azul)
+    SDL_SetRenderDrawColor(graphics.renderer, 135, 206, 235, 255); // Azul céu
     SDL_RenderClear(graphics.renderer);
+    
+    // Solo (marrom)
     SDL_Rect solo_rect = {0, SCREEN_HEIGHT - (SCREEN_HEIGHT / TELA_ALTURA), SCREEN_WIDTH, SCREEN_HEIGHT / TELA_ALTURA};
     SDL_SetRenderDrawColor(graphics.renderer, 139, 69, 19, 255);
     SDL_RenderFillRect(graphics.renderer, &solo_rect);
+    
+    // Desenhar obstáculos com nova função
     for (int i = 0; i < MAX_OBSTACULOS; i++) {
         if (obstaculos[i].ativo) {
             int x = (obstaculos[i].x * SCREEN_WIDTH) / TELA_LARGURA;
             int y = (obstaculos[i].y * SCREEN_HEIGHT) / TELA_ALTURA;
-            SDL_Rect obs_rect = {x, y, SCREEN_WIDTH / TELA_LARGURA, SCREEN_HEIGHT / TELA_ALTURA};
-            SDL_SetRenderDrawColor(graphics.renderer, 205, 133, 63, 255);
-            SDL_RenderDrawRect(graphics.renderer, &obs_rect);
+            graphics_draw_obstacle(x, y);
         }
     }
+    
+    // Depósito (melhorado)
     SDL_Rect deposito_rect = {5, SCREEN_HEIGHT - 3 * (SCREEN_HEIGHT / TELA_ALTURA), SCREEN_WIDTH / 16, 2 * (SCREEN_HEIGHT / TELA_ALTURA)};
-    SDL_SetRenderDrawColor(graphics.renderer, 205, 133, 63, 255);
+    SDL_SetRenderDrawColor(graphics.renderer, 160, 82, 45, 255); // Marrom
+    SDL_RenderFillRect(graphics.renderer, &deposito_rect);
+    SDL_SetRenderDrawColor(graphics.renderer, 139, 69, 19, 255); // Contorno
     SDL_RenderDrawRect(graphics.renderer, &deposito_rect);
+    
+    // Ponte (melhorada)
     SDL_Rect ponte_rect = {SCREEN_WIDTH / 16, SCREEN_HEIGHT - (SCREEN_HEIGHT / TELA_ALTURA), SCREEN_WIDTH / 3, SCREEN_HEIGHT / (2 * TELA_ALTURA)};
-    SDL_SetRenderDrawColor(graphics.renderer, 205, 133, 63, 255);
+    SDL_SetRenderDrawColor(graphics.renderer, 160, 82, 45, 255);
     SDL_RenderFillRect(graphics.renderer, &ponte_rect);
+    SDL_SetRenderDrawColor(graphics.renderer, 139, 69, 19, 255);
+    SDL_RenderDrawRect(graphics.renderer, &ponte_rect);
+    
+    // Plataforma com nova função
     int plat_x = (plataforma.x * SCREEN_WIDTH) / TELA_LARGURA;
     int plat_y = (plataforma.y * SCREEN_HEIGHT) / TELA_ALTURA;
-    SDL_Rect plat_rect = {plat_x, plat_y, (plataforma.largura * SCREEN_WIDTH) / TELA_LARGURA, (plataforma.altura * SCREEN_HEIGHT) / TELA_ALTURA};
-    SDL_SetRenderDrawColor(graphics.renderer, 34, 139, 34, 255);
-    SDL_RenderFillRect(graphics.renderer, &plat_rect);
-    SDL_SetRenderDrawColor(graphics.renderer, 0, 255, 0, 255);
-    SDL_RenderDrawRect(graphics.renderer, &plat_rect);
+    int plat_w = (plataforma.largura * SCREEN_WIDTH) / TELA_LARGURA;
+    int plat_h = (plataforma.altura * SCREEN_HEIGHT) / TELA_ALTURA;
+    graphics_draw_platform(plat_x, plat_y, plat_w, plat_h);
+    
+    // Helicóptero com nova função
     pthread_mutex_lock(&helicoptero.mutex);
     if (helicoptero.vivo) {
         int x = (helicoptero.x * SCREEN_WIDTH) / TELA_LARGURA;
         int y = (helicoptero.y * SCREEN_HEIGHT) / TELA_ALTURA;
-        SDL_Rect heli_rect = {x, y, 20, 15};
-        SDL_SetRenderDrawColor(graphics.renderer, 173, 255, 47, 255);
-        SDL_RenderFillRect(graphics.renderer, &heli_rect);
-        SDL_SetRenderDrawColor(graphics.renderer, 0, 255, 0, 255);
-        SDL_RenderDrawRect(graphics.renderer, &heli_rect);
+        graphics_draw_helicopter(x, y);
     }
     pthread_mutex_unlock(&helicoptero.mutex);
+    
+    // Soldados esperando (melhorados)
     int soldados_restantes = soldados_total - soldados_resgatados - soldados_embarcados;
     for (int i = 0; i < soldados_restantes && i < 5; i++) {
-        int x = 10 + (i * 20);
-        int y = SCREEN_HEIGHT - 50;
-        SDL_Rect soldado_rect = {x, y, 15, 20};
-        SDL_SetRenderDrawColor(graphics.renderer, 255, 255, 0, 255);
-        SDL_RenderFillRect(graphics.renderer, &soldado_rect);
-        SDL_SetRenderDrawColor(graphics.renderer, 255, 165, 0, 255);
-        SDL_RenderDrawRect(graphics.renderer, &soldado_rect);
+        int x = 10 + (i * 25);
+        int y = SCREEN_HEIGHT - 70;
+        graphics_draw_soldier(x, y, 0);
     }
+    
+    // Soldado no helicóptero (se houver)
     pthread_mutex_lock(&helicoptero.mutex);
     if (helicoptero.vivo && soldados_embarcados > 0) {
         int hx = (helicoptero.x * SCREEN_WIDTH) / TELA_LARGURA;
         int hy = (helicoptero.y * SCREEN_HEIGHT) / TELA_ALTURA;
-        SDL_Rect soldado_rect = {hx + 5, hy - 5, 10, 10};
-        SDL_SetRenderDrawColor(graphics.renderer, 255, 255, 0, 255);
-        SDL_RenderFillRect(graphics.renderer, &soldado_rect);
-        SDL_SetRenderDrawColor(graphics.renderer, 255, 165, 0, 255);
-        SDL_RenderDrawRect(graphics.renderer, &soldado_rect);
+        graphics_draw_soldier(hx + 10, hy - 8, 1);
     }
     pthread_mutex_unlock(&helicoptero.mutex);
+    
+    // Baterias com nova função
     if (bateria0.ativa) {
         int x = (bateria0.x * SCREEN_WIDTH) / TELA_LARGURA;
         int y = (bateria0.y * SCREEN_HEIGHT) / TELA_ALTURA;
-        SDL_Rect bat0_rect = {x, y, 18, 12};
-        if (bateria0.recarregando) {
-            SDL_SetRenderDrawColor(graphics.renderer, 255, 165, 0, 255);
-        } else {
-            SDL_SetRenderDrawColor(graphics.renderer, 30, 144, 255, 255);
-        }
-        SDL_RenderFillRect(graphics.renderer, &bat0_rect);
-        SDL_SetRenderDrawColor(graphics.renderer, 0, 0, 255, 255);
-        SDL_RenderDrawRect(graphics.renderer, &bat0_rect);
+        graphics_draw_battery(x, y, bateria0.recarregando);
     }
     if (bateria1.ativa) {
         int x = (bateria1.x * SCREEN_WIDTH) / TELA_LARGURA;
         int y = (bateria1.y * SCREEN_HEIGHT) / TELA_ALTURA;
-        SDL_Rect bat1_rect = {x, y, 18, 12};
-        if (bateria1.recarregando) {
-            SDL_SetRenderDrawColor(graphics.renderer, 255, 165, 0, 255);
-        } else {
-            SDL_SetRenderDrawColor(graphics.renderer, 0, 191, 255, 255);
-        }
-        SDL_RenderFillRect(graphics.renderer, &bat1_rect);
-        SDL_SetRenderDrawColor(graphics.renderer, 0, 0, 255, 255);
-        SDL_RenderDrawRect(graphics.renderer, &bat1_rect);
+        graphics_draw_battery(x, y, bateria1.recarregando);
     }
+    
+    // Foguetes com nova função
     for (int i = 0; i < MAX_FOGUETES; i++) {
         if (foguetes[i].ativo) {
             int x = (foguetes[i].x * SCREEN_WIDTH) / TELA_LARGURA;
             int y = (foguetes[i].y * SCREEN_HEIGHT) / TELA_ALTURA;
-            SDL_Rect fog_rect = {x, y, 8, 4};
-            SDL_SetRenderDrawColor(graphics.renderer, 255, 0, 0, 255);
-            SDL_RenderFillRect(graphics.renderer, &fog_rect);
-            SDL_SetRenderDrawColor(graphics.renderer, 255, 255, 255, 255);
-            SDL_RenderDrawRect(graphics.renderer, &fog_rect);
+            graphics_draw_rocket(x, y);
         }
     }
+    
+    // Interface de status
     char status[128];
     snprintf(status, sizeof(status), "Embarcados: %d  Resgatados: %d  Total: %d", soldados_embarcados, soldados_resgatados, soldados_total);
     graphics_draw_text_centered(status, 10, NULL, (SDL_Color){255,255,255,255});
-    graphics_draw_text_centered("Verde=Helicoptero  Amarelo=Soldados  Azul=Baterias  Vermelho=Foguetes  Verde=Plataforma", 30, NULL, (SDL_Color){255,255,255,255});
+    
+    // Instruções
+    graphics_draw_text_centered("Use as SETAS para mover o helicoptero - Leve os soldados para a plataforma verde!", 30, NULL, (SDL_Color){255,255,255,255});
+    
     SDL_RenderPresent(graphics.renderer);
 }
 
